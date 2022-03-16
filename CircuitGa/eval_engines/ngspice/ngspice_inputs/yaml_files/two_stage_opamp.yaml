@@ -1,0 +1,19 @@
+dsn_netlist: "CircuitGa/eval_engines/ngspice/ngspice_inputs/netlist/two_stage_opamp.cir"
+num_process: 1
+
+params:
+  mp1:  !!python/tuple [1, 100, 1]
+  mn1:  !!python/tuple [1, 100, 1]
+  mp3:  !!python/tuple [1, 100, 1]
+  mn3:  !!python/tuple [1, 100, 1]
+  mn4:  !!python/tuple [1, 100, 1]
+  mn5:  !!python/tuple [1, 100, 1]
+  cc:   !!python/tuple [!!float 0.1e-12, !!float 10.0e-12, !!float 0.1e-12]
+
+
+
+target_specs:
+  gain_min: !!python/tuple [200,400]
+  ugbw_min: !!python/tuple [!!float 1.0e6, !!float 2.5e7]
+  phm_min: !!python/tuple [60,60.0000001]
+  ibias_max: !!python/tuple [0.0001, 0.01]
