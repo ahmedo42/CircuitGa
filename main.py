@@ -3,6 +3,7 @@ import numpy as np
 import argparse
 from CircuitGa.eval_engines.ngspice.TwoStageClass import *
 from CircuitGa.eval_engines.ngspice.csamp import *
+from CircuitGa.eval_engines.ddb.folded_cascode import *
 from deap import algorithms, base, creator, tools
 from deap.algorithms import eaSimple
 from blackbox import *
@@ -18,8 +19,9 @@ random.seed(args.seed)
 CIR_YAML = f"CircuitGa/eval_engines/ngspice/ngspice_inputs/yaml_files/{args.env}.yaml"
 if args.env == "two_stage_opamp":
     sim_env = TwoStageClass(yaml_path=CIR_YAML, num_process=1, path=os.getcwd())
-else:
-    sim_env = CsAmpClass(yaml_path=CIR_YAML, num_process=1, path=os.getcwd())
+elif args.env == "folded_cascode":
+    CIR_YAML = "autockt/eval_engines/ddb/" + args.env + ".yaml"
+    sim_env = FoldedCascode()
 
 box = BlackBox(sim_env, CIR_YAML)
 

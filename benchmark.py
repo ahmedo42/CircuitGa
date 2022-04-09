@@ -5,6 +5,7 @@ from custom import eaSimple
 from itertools import product
 from collections import OrderedDict
 from CircuitGa.eval_engines.ngspice.TwoStageClass import *
+from CircuitGa.eval_engines.ddb.folded_cascode import *
 import random
 from blackbox import BlackBox
 import argparse
@@ -15,6 +16,7 @@ parser.add_argument("--mut_indpb",type=float,default=0.5)
 parser.add_argument("--cx_indpb",type=float,default=0.5)
 parser.add_argument("--pop",type=int,default=300)
 parser.add_argument("--gen",type=int,default=50)
+parser.add_argument("--env",type=str,default="two_stage_opamp")
 args = parser.parse_args()
 
 def load_valid_specs():
@@ -23,8 +25,6 @@ def load_valid_specs():
         
     specs = OrderedDict(sorted(specs.items(), key=lambda k: k[0]))
     return specs
-
-
 
 
 def evaluate(toolbox,box):
@@ -55,18 +55,24 @@ def evaluate(toolbox,box):
     print(np.mean(n_evals))
             
 if __name__ == "__main__":
-    CIR_YAML = "CircuitGa/eval_engines/ngspice/ngspice_inputs/yaml_files/two_stage_opamp.yaml"
-    sim_env = TwoStageClass(yaml_path=CIR_YAML, num_process=1, path=os.getcwd())
+    CIR_YAML = f"CircuitGa/eval_engines/ngspice/ngspice_inputs/yaml_files/{args.env}.yaml"
+    if args.env == "two_stage_opamp":
+        sim_env = TwoStageClass(yaml_path=CIR_YAML, num_process=1, path=os.getcwd())
+    elif args.env == "folded_cascode":
+        CIR_YAML = "CircuitGa/eval_engines/ddb/" + args.env + ".yaml"
+        df_path = "CircuitGa/eval_engines/ddb/" + args.env + ".csv"
+        sim_env = FoldedCascode(df_path)
 
+    box = BlackBox(sim_env, CIR_YAML)
+    param_upper_limit = tuple([len(param_vec) for param_vec in box.params])
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox = base.Toolbox()
-    box = BlackBox(sim_env, CIR_YAML)
     toolbox.register("generate", box.generate_random_params)
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.generate)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
     toolbox.register("mate", tools.cxUniform,indpb=0.5)
-    toolbox.register("mutate", tools.mutUniformInt,indpb=0.5,low=(0),up=(98))
+    toolbox.register("mutate", tools.mutUniformInt,indpb=0.5,low=(0)*len(box.params_id),up=param_upper_limit)
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("evaluate", box.simulate)
     evaluate(toolbox,box)

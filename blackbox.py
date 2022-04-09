@@ -27,11 +27,10 @@ class BlackBox:
         return norm_spec
 
     def _calculate_cost(self,spec):
-        specs_id = ["gain","ibias_max","phase_margin","ugbw"]
         rel_specs = self._normalize(np.array(spec))
         cost = 0.0
         for i,rel_spec in enumerate(rel_specs):
-            if specs_id[i] == 'ibias_max':
+            if self.specs_id[i] == 'ibias_max' or self.specs_id[i] == "IB":
                 rel_spec *= -1.0
             if rel_spec < 0:
                 cost += rel_spec
@@ -42,10 +41,12 @@ class BlackBox:
     def simulate(self,design,result="cost"):
         params_idx = design
         new_params = [self.params[i][params_idx[i]] for i in range(len(self.params_id))]
-        param_val = [OrderedDict(list(zip(self.params_id,new_params)))]
-        
-        specs = OrderedDict(sorted(self.simulator.create_design_and_simulate(param_val[0])[1].items(), key=lambda k:k[0]))
-        specs = list(specs.values())
+        if hasattr(self.simulator,"df"):
+            specs = self.simulator.update(new_params)
+        else:
+            param_val = [OrderedDict(list(zip(self.params_id,new_params)))]
+            specs = OrderedDict(sorted(self.simulator.create_design_and_simulate(param_val[0])[1].items(), key=lambda k:k[0]))
+            specs = list(specs.values())
         return self._calculate_cost(specs) if result == "cost" else specs
 
     def generate_random_params(self):
