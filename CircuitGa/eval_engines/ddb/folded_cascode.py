@@ -6,14 +6,17 @@ from collections import OrderedDict
 import gym
 import numpy as np
 import pandas as pd
-from autockt.utils import OrderedDictYAMLLoader
-from autockt.envs.ngspice_env import  NgspiceEnv
+from yaml_loader import OrderedDictYAMLLoader
 from gym import spaces
 from scipy import spatial 
 
 class FoldedCascode:
-    def __init__(self,df_path):
+    def __init__(self,df_path,yaml_path):
         self.df = pd.read_csv(df_path)
+        with open(yaml_file, 'r') as f:
+            yaml_data = yaml.load(f, OrderedDictYAMLLoader)
+        self.specs_id = sorted(list(yaml_data['target_specs'].keys()))
+        self.params_id = sorted(list(params_dict.keys()))
 
     def _get_closest_spec(self,params):
         if not hasattr(self, "params_tree"):
@@ -28,6 +31,5 @@ class FoldedCascode:
         return result.values[0]
 
     def update(self,params):
-        params = params.astype(np.int32)
         cur_specs = self._get_closest_spec(params)
         return cur_specs

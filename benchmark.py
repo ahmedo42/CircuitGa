@@ -33,10 +33,10 @@ def evaluate(toolbox,box):
     random.seed(random.randrange(int(1e6)))
     performances = []
     n_evals = []
-    for j , (gain,ibias,phm,ugbw) in enumerate(zip(specs["gain_min"],specs["ibias_max"],specs["phm_min"],specs["ugbw_min"])):
-        if j == 100:
+    for i in range(1000):
+        if i == 100:
             break
-        target_specs = [gain,ibias,phm,ugbw]
+        target_specs = [spec[i] for spec in specs.values()]
         setattr(box, "target_specs", target_specs)
         pop = toolbox.population(n=300)
         hof = tools.HallOfFame(1)
@@ -61,10 +61,10 @@ if __name__ == "__main__":
     elif args.env == "folded_cascode":
         CIR_YAML = "CircuitGa/eval_engines/ddb/" + args.env + ".yaml"
         df_path = "CircuitGa/eval_engines/ddb/" + args.env + ".csv"
-        sim_env = FoldedCascode(df_path)
+        sim_env = FoldedCascode(df_path,CIR_YAML)
 
     box = BlackBox(sim_env, CIR_YAML)
-    param_upper_limit = tuple([len(param_vec) for param_vec in box.params])
+    param_upper_limit = tuple([len(param_vec)-1 for param_vec in box.params])
     creator.create("FitnessMax", base.Fitness, weights=(1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMax)
     toolbox = base.Toolbox()

@@ -14,7 +14,6 @@ class BlackBox:
         self.specs_id = sorted(list(yaml_data['target_specs'].keys()))
 
     def _init_params(self,params_dict):
-        param_vals = list(params_dict.values())
         self.params = []
         self.params_id = list(params_dict.keys())
         for value in params_dict.values():
