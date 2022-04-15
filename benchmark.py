@@ -15,10 +15,11 @@ parser.add_argument("--mutpb",type=float,default=0.5)
 parser.add_argument("--mut_indpb",type=float,default=0.5)
 parser.add_argument("--cx_indpb",type=float,default=0.5)
 parser.add_argument("--pop",type=int,default=300)
-parser.add_argument("--gen",type=int,default=50)
+parser.add_argument("--ngen",type=int,default=50)
 parser.add_argument("--env",type=str,default="two_stage_opamp")
 args = parser.parse_args()
 
+# TODO: Train on genetic
 def load_valid_specs():
     with open("valid_specs", 'rb') as f:
         specs = pickle.load(f)
@@ -38,14 +39,14 @@ def evaluate(toolbox,box):
             break
         target_specs = [spec[i] for spec in specs.values()]
         setattr(box, "target_specs", target_specs)
-        pop = toolbox.population(n=300)
+        pop = toolbox.population(n=args.pop)
         hof = tools.HallOfFame(1)
         stats = tools.Statistics(lambda ind: ind.fitness.values)
         stats.register("avg", np.mean)
         stats.register("std", np.std)
         stats.register("min", np.min)
         stats.register("max", np.max)
-        pop, log = eaSimple(pop, toolbox, cxpb=0.5, mutpb=0.5, ngen=50, stats=stats, halloffame=hof, verbose=True)
+        pop, log = eaSimple(pop, toolbox, cxpb=args.cxpb, mutpb=args.mutpb, ngen=args.ngen, stats=stats, halloffame=hof, verbose=True)
         hof_performance = box.simulate(hof[0],result="cost")[0]
         if hof_performance > 0:
             designs_met += 1
@@ -71,8 +72,8 @@ if __name__ == "__main__":
     toolbox.register("generate", box.generate_random_params)
     toolbox.register("individual", tools.initIterate, creator.Individual, toolbox.generate)
     toolbox.register("population", tools.initRepeat, list, toolbox.individual)
-    toolbox.register("mate", tools.cxUniform,indpb=0.5)
-    toolbox.register("mutate", tools.mutUniformInt,indpb=0.5,low=(0)*len(box.params_id),up=param_upper_limit)
+    toolbox.register("mate", tools.cxUniform,indpb=args.cx_indpb)
+    toolbox.register("mutate", tools.mutUniformInt,indpb=args.mut_indpb,low=(0)*len(box.params_id),up=param_upper_limit)
     toolbox.register("select", tools.selTournament, tournsize=3)
     toolbox.register("evaluate", box.simulate)
     evaluate(toolbox,box)
