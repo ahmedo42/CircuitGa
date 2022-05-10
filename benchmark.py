@@ -30,7 +30,7 @@ def load_valid_specs():
 def evaluate(toolbox,box):
     specs = load_valid_specs()
     designs_met = 0
-    random.seed(random.randrange(int(1e6)))
+    random.seed(15)
     performances = []
     n_evals = []
     for i in range(1000):
