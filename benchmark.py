@@ -19,9 +19,8 @@ parser.add_argument("--ngen",type=int,default=50)
 parser.add_argument("--env",type=str,default="two_stage_opamp")
 args = parser.parse_args()
 
-# TODO: Train on genetic
 def load_valid_specs():
-    with open("valid_specs", 'rb') as f:
+    with open("specs_valid_two_stage_opamp", 'rb') as f:
         specs = pickle.load(f)
         
     specs = OrderedDict(sorted(specs.items(), key=lambda k: k[0]))
@@ -50,7 +49,7 @@ def evaluate(toolbox,box):
         hof_performance = box.simulate(hof[0],result="cost")[0]
         if hof_performance > 0:
             designs_met += 1
-        print(f"total achieved designs : {designs_met}/1000, currently at {j+1} ")
+        print(f"total achieved designs : {designs_met}/1000, currently at {i+1} ")
         n_evals.append(np.mean(log.select("nevals")))
         print("#"*10)
     print(np.mean(n_evals))
