@@ -50,7 +50,7 @@ def evaluate(toolbox,box):
         if hof_performance > 0:
             designs_met += 1
         print(f"total achieved designs : {designs_met}/1000, currently at {i+1} ")
-        n_evals.append(np.mean(log.select("nevals")))
+        n_evals.append(np.sum(log.select("nevals")))
         print("#"*10)
     print(np.mean(n_evals))
             

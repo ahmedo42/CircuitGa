@@ -34,7 +34,7 @@ class BlackBox:
             if rel_spec < 0:
                 cost += rel_spec
 
-        cost = cost if cost < -0.02 else sum(rel_specs)
+        cost = cost if cost < -0.02 else 10
         return [cost]
 
     def simulate(self,design,result="cost"):
