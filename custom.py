@@ -1,9 +1,16 @@
+from deap import algorithms, tools
 
-import random
-from deap import tools,algorithms
 
-def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
-             halloffame=None, verbose=__debug__):
+def eaSimple(
+    population,
+    toolbox,
+    cxpb,
+    mutpb,
+    ngen,
+    stats=None,
+    halloffame=None,
+    verbose=__debug__,
+):
     """This algorithm reproduce the simplest evolutionary algorithm as
     presented in chapter 7 of [Back2000]_.
     :param population: A list of individuals.
@@ -55,7 +62,7 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
        Basic Algorithms and Operators", 2000.
     """
     logbook = tools.Logbook()
-    logbook.header = ['gen', 'nevals'] + (stats.fields if stats else [])
+    logbook.header = ["gen", "nevals"] + (stats.fields if stats else [])
 
     # Evaluate the individuals with an invalid fitness
     invalid_ind = [ind for ind in population if not ind.fitness.valid]
@@ -100,6 +107,6 @@ def eaSimple(population, toolbox, cxpb, mutpb, ngen, stats=None,
 
         max_fitness = max(logbook.select("max"))
         if max_fitness >= 0:
-            return population,logbook
+            return population, logbook
 
     return population, logbook

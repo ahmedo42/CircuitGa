@@ -1,5 +1,2 @@
-tensorboardX
 pyyaml
 deap
-lz4
-hiredis

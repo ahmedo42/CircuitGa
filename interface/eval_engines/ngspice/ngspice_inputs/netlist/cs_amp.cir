@@ -1,5 +1,5 @@
 cs_amp test
-.include "/home/ahmedo42/CircuitGa/CircuitGa/eval_engines/ngspice/ngspice_inputs/spice_models/45nm_bulk.txt"
+.include "/home/ahmed/CircuitGa/interface/eval_engines/ngspice/ngspice_inputs/spice_models/45nm_bulk.txt"
 
 .param  vbias=0.8
 .param  rload=500

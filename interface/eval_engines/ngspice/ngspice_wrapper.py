@@ -8,6 +8,7 @@ import yaml
 
 debug = False
 
+
 class NgSpiceWrapper(object):
 
     BASE_TMP_DIR = os.path.abspath("/tmp/ckt_da")
@@ -18,11 +19,11 @@ class NgSpiceWrapper(object):
         else:
             self.root_dir = root_dir
 
-        with open(yaml_path, 'r') as f:
+        with open(yaml_path, "r") as f:
             yaml_data = yaml.load(f)
-        design_netlist = yaml_data['dsn_netlist']
-        design_netlist = path+'/'+design_netlist
- 
+        design_netlist = yaml_data["dsn_netlist"]
+        design_netlist = path + "/" + design_netlist
+
         _, dsg_netlist_fname = os.path.split(design_netlist)
         self.base_design_name = os.path.splitext(dsg_netlist_fname)[0]
         self.num_process = num_process
@@ -31,7 +32,7 @@ class NgSpiceWrapper(object):
         os.makedirs(self.root_dir, exist_ok=True)
         os.makedirs(self.gen_dir, exist_ok=True)
 
-        raw_file = open(design_netlist, 'r')
+        raw_file = open(design_netlist, "r")
         self.tmp_lines = raw_file.readlines()
         raw_file.close()
 
@@ -42,55 +43,60 @@ class NgSpiceWrapper(object):
         return fname
 
     def create_design(self, state, new_fname):
-        design_folder = os.path.join(self.gen_dir, new_fname)+str(random.randint(0,10000))
+        design_folder = os.path.join(self.gen_dir, new_fname) + str(
+            random.randint(0, 10000)
+        )
         os.makedirs(design_folder, exist_ok=True)
 
-        fpath = os.path.join(design_folder, new_fname + '.cir')
+        fpath = os.path.join(design_folder, new_fname + ".cir")
 
         lines = copy.deepcopy(self.tmp_lines)
         for line_num, line in enumerate(lines):
-            if '.include' in line:
-                regex = re.compile("\.include\s*\"(.*?)\"")
+            if ".include" in line:
+                regex = re.compile('\.include\s*"(.*?)"')
                 found = regex.search(line)
                 if found:
-                    pass 
-            if '.param' in line:
+                    pass
+            if ".param" in line:
                 for key, value in state.items():
                     regex = re.compile("%s=(\S+)" % (key))
                     found = regex.search(line)
                     if found:
                         new_replacement = "%s=%s" % (key, str(value))
-                        lines[line_num] = lines[line_num].replace(found.group(0), new_replacement)
-            if 'wrdata' in line:
+                        lines[line_num] = lines[line_num].replace(
+                            found.group(0), new_replacement
+                        )
+            if "wrdata" in line:
                 regex = re.compile("wrdata\s*(\w+\.\w+)\s*")
                 found = regex.search(line)
                 if found:
                     replacement = os.path.join(design_folder, found.group(1))
-                    lines[line_num] = lines[line_num].replace(found.group(1), replacement)
+                    lines[line_num] = lines[line_num].replace(
+                        found.group(1), replacement
+                    )
 
-        with open(fpath, 'w') as f:
+        with open(fpath, "w") as f:
             f.writelines(lines)
             f.close()
         return design_folder, fpath
 
     def simulate(self, fpath):
-        info = 0 # this means no error occurred
-        command = "ngspice -b %s >/dev/null 2>&1" %fpath
+        info = 0  # this means no error occurred
+        command = "ngspice -b %s >/dev/null 2>&1" % fpath
         exit_code = os.system(command)
         if debug:
             print(command)
             print(fpath)
 
-        if (exit_code % 256):
-           # raise RuntimeError('program {} failed!'.format(command))
-            info = 1 # this means an error has occurred
+        if exit_code % 256:
+            # raise RuntimeError('program {} failed!'.format(command))
+            info = 1  # this means an error has occurred
         return info
-
 
     def create_design_and_simulate(self, state, dsn_name=None, verbose=False):
         if debug:
-            print('state', state)
-            print('verbose', verbose)
+            print("state", state)
+            print("verbose", verbose)
         if dsn_name == None:
             dsn_name = self.get_design_name(state)
         else:
